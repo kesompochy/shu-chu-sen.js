@@ -8,33 +8,57 @@ describe("Scene with no args", () => {
   it("has children", () => {
     expect(scene.children).toBeInstanceOf(Set<Scene>);
   });
-  it("has parent", () => {
-    expect(scene).toHaveProperty("parent");
+
+  it("can update", () => {
+    expect(scene.update).toBeDefined();
+  });
+  it("can start", () => {
+    expect(scene.start).toBeDefined();
+  });
+  it("can stop", () => {
+    expect(scene.stop).toBeDefined;
+  });
+  it("should execute afterUpdateAction after it updates", () => {
+    let a = 0;
+    scene.afterUpdate = () => {
+      a += 1;
+    };
+    scene.update();
+    expect(a).toBe(1);
+  });
+});
+
+describe("Scene with args", () => {
+  const child = new Scene({
+    props: {
+      name: String,
+      age: Number,
+    },
+  });
+  const scene = new Scene({
+    children: [child],
+    fps: 60,
+  });
+  scene.age = 30;
+  scene.name = "myname";
+
+  it("should have children", () => {
+    expect(scene.children.has(child)).toBeTruthy();
   });
 
-  it("has properties" + scene.props, () => {
-    console.log(scene.props);
-    expect(scene.props).toBeInstanceOf(Array<String>);
+  it("should have fps 60", () => {
+    expect(scene.fps).toBe(60);
   });
 
-  describe("with parent", () => {
-    const parent = new Scene();
-    it("can be child of parent and can not be", () => {
-      scene.beChildOf(parent);
-      expect(parent.children).contain(scene);
-      expect(scene.parent).toBe(parent);
+  it("props should be accessed by props name", () => {
+    expect(child.name).toBeDefined();
+  });
 
-      scene.beNotChildOf(parent);
-      expect(parent.children.has(scene)).toBeFalsy();
-      expect(scene.parent).toBeUndefined();
-    });
-
-    describe("Scene with props and parent", () => {
-      const sceneWithProps = new Scene({
-        props: ["a"],
-      });
-
-      it("has children", () => {});
+  describe("when it updated", () => {
+    scene.update();
+    it("child should have updated prop", () => {
+      expect(child.name).toBe("myname");
+      expect(child.age).toBe(30);
     });
   });
 });
