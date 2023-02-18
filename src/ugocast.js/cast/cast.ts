@@ -1,15 +1,21 @@
-import Scene from "../scene";
+interface iArgs {
+  props?: string[];
+}
+const defaultArgs: iArgs = {
+  props: [],
+};
 
-import { iArgs } from "../scene/scene";
-
-interface iCastArgs extends iArgs {}
-
-const defaultArgs: iCastArgs = {};
-
-export default class Cast extends Scene {
-  afterUpdate = this.act;
-  constructor(args: iCastArgs = {}) {
-    super(args);
+export default class Cast {
+  props: { [K: string]: any };
+  propKeys: Set<string>;
+  action: (delta: number) => void = () => {};
+  constructor(args: iArgs = {}) {
+    const propKeys = args.props || defaultArgs.props!;
+    this.propKeys = new Set(propKeys);
+    this.props = {};
   }
-  act(): void {}
+
+  act(delta: number = 1): void {
+    this.action(delta);
+  }
 }

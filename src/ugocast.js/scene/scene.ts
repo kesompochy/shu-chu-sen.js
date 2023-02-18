@@ -1,60 +1,78 @@
-interface iProps {
-  [K: string]: Function;
-}
+import Cast from "../cast";
 
 export interface iArgs {
-  children?: Array<Scene>;
+  casts?: Array<Cast>;
   fps?: number;
-  props?: iProps;
+  notes?: { [K: string]: any };
 }
 
 const defaultArgs: iArgs = {
-  children: [],
+  casts: [],
   fps: 60,
-  props: {},
+  notes: {},
 };
 
 export default class Scene {
-  children: Set<Scene> = new Set();
-  parent: Scene | undefined;
-  private props: { [K: string]: any } = {};
+  casts: Set<Cast> = new Set();
+  notes: { [K: string]: any } = {};
+  propsType: { [K: string]: Function } = {};
   fps: number;
-  [key: string]: any;
+  private _looping: boolean;
+  private ticking: number;
+  get looping() {
+    return this._looping;
+  }
+  private previousTimeStamp: number = 0;
   afterUpdate: () => void = () => {};
   constructor(args: iArgs = {}) {
-    const children = args.children || defaultArgs.children!;
-    children.map((scene: Scene) => {
-      this.children.add(scene);
+    const casts = args.casts || defaultArgs.casts!;
+    casts.map((cast: Cast) => {
+      this.casts.add(cast);
     });
 
     this.fps = args.fps || defaultArgs.fps!;
 
-    const props = args.props || defaultArgs.props!;
+    const notes = args.notes || defaultArgs.notes!;
+    this.notes = notes;
+  }
 
-    for (const key of Object.keys(props)) {
-      this.props[key] = props[key];
-      Object.defineProperty(this, key, {
-        get: function () {
-          return this.props[key];
-        },
-        configurable: true,
+  update(delta: number = 1): void {
+    this.casts.forEach((cast: Cast) => {
+      cast.propKeys.forEach((key) => {
+        cast.props[key] = this.notes[key];
       });
-    }
-  }
-
-  update(): void {
-    this.children.forEach((child: Scene) => {
-      child.updateSelfProps(this);
-      child.update();
+      cast.act(delta);
     });
-    this.afterUpdate();
   }
 
-  updateSelfProps(sourceParent: Scene): void {
-    for (const key of Object.keys(this.props)) {
-      this.props[key] = sourceParent[key];
+  private loop(timestamp: number) {
+    const delta = this.calcDelta(timestamp, this.previousTimeStamp, this.fps);
+    this.update(delta);
+    this.ticking = window.requestAnimationFrame(this.loop.bind(this));
+  }
+
+  private calcDelta(
+    timestamp: number,
+    previousTimeStamp: number,
+    fps: number
+  ): number {
+    const MILLI_SEC = 1000;
+    const elapsed = timestamp - previousTimeStamp;
+    this.previousTimeStamp = timestamp;
+    const delta = elapsed / (MILLI_SEC / fps);
+    return delta;
+  }
+
+  start(): void {
+    if (!this.looping) {
+      this.ticking = window.requestAnimationFrame(this.loop.bind(this));
+      this._looping = true;
     }
   }
-  start(): void {}
-  stop(): void {}
+  stop(): void {
+    if (this.looping) {
+      window.cancelAnimationFrame(this.ticking);
+      this._looping = false;
+    }
+  }
 }
