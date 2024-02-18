@@ -1,0 +1,9 @@
+# Dependency directories
+node_modules/
+.pnpm-store/
+
+# Build outputs
+dist/
+
+# Environment files
+.env
