@@ -6,7 +6,7 @@ export default class Editor {
   color: string;
   canvas: Canvas | undefined;
   ctx: CanvasRenderingContext2D | undefined;
-  frameNumber: number = 3;
+  frameNumber: number = 10;
   constructor(image: Image, color: string) {
     this.color = color;
 
@@ -36,11 +36,11 @@ export default class Editor {
 
     encoder.start();
     encoder.setRepeat(0);
-    encoder.setDelay(1);
-    encoder.setQuality(50);
+    encoder.setDelay(33);
+    encoder.setQuality(10);
 
     for (let i = 0; i < this.frameNumber; i++) {
-      const ctx = this.generateFrameWithFocusLine();
+      const ctx = this.generateFrameWithFocusLine(i);
       if (ctx) {
         encoder.addFrame(ctx as any);
       }
@@ -51,15 +51,29 @@ export default class Editor {
     return gif;
   }
 
-  generateFrameWithFocusLine(): CanvasRenderingContext2D | undefined {
+  generateFrameWithFocusLine(i: number): CanvasRenderingContext2D | undefined {
     const canvas = this.canvas;
     const ctx = this.ctx;
     if (!canvas || !ctx || !this.image) {
       return;
     }
 
-    // 画像を描画
-    ctx.drawImage(this.image, 0, 0);
+  // キャンバスをクリア
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  // スケールを計算（周期的に変化）
+  const scale = 1 + 0.1 * Math.sin(i * Math.PI / this.frameNumber);
+
+  // 画像の中心位置を計算
+  const imageCenterX = canvas.width / 2;
+  const imageCenterY = canvas.height / 2;
+
+  // 画像の描画開始位置を計算
+  const drawX = imageCenterX - (this.image.width * scale) / 2;
+  const drawY = imageCenterY - (this.image.height * scale) / 2;
+
+  // 画像をスケーリングして描画
+  ctx.drawImage(this.image, drawX, drawY, this.image.width * scale, this.image.height * scale);
 
     // 集中線の中心点（例として画像の中心を使用）
     const centerX = canvas.width / 2;
