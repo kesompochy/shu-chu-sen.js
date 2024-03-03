@@ -80,8 +80,8 @@ export default class Editor {
     ctx.drawImage(this.image, drawX, drawY, this.image.width * scale * this.sizeRatio, this.image.height * scale * this.sizeRatio);
 
     // フィルター効果を適用する色を計算（ここでは例として赤色を強調）
-    const r = Math.floor(255 * Math.abs(Math.sin(i * 2 * Math.PI / this.frameNumber)));
-    const color = `rgba(${r}, 0, 0, 0.3)`; // 赤色を半透明で重ねる
+    const r = Math.floor(100 + 155 * Math.abs(Math.sin(i * 0.7 * Math.PI / this.frameNumber)));
+    const color = `rgba(${r}, 100, 100, 0.3)`; // 赤色を半透明で重ねる
 
     // ブレンドモードを設定
     ctx.globalCompositeOperation = 'source-atop';
