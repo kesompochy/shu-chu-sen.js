@@ -2,16 +2,19 @@ import fs from "fs";
 const { loadImage, Image } = require("canvas");
 import Editor from "./Editor";
 
-const main = async (sourceFilePath: string, outFilePath?: string, color?: string) => {
+const main = async (sourceFilePath: string, outFilePath?: string, color?: string, frameNumber?: number, sizeRatio?: number) => {
   color = color || "black";
   outFilePath = outFilePath || "output.gif";
+  frameNumber = frameNumber || 10;
+  sizeRatio = sizeRatio || 0.25;
 
   const image: typeof Image = await loadImage(sourceFilePath);
 
-  const editor = new Editor(image, color!);
+  const editor = new Editor(image, color!, frameNumber!, sizeRatio);
   const gif = editor.generateGif();
   if (gif) {
     fs.writeFileSync(outFilePath!, gif);
+    console.log(`Gif saved to ${outFilePath}!`);
   }
 };
 

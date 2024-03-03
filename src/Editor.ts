@@ -6,16 +6,20 @@ export default class Editor {
   color: string;
   canvas: Canvas | undefined;
   ctx: CanvasRenderingContext2D | undefined;
-  frameNumber: number = 10;
-  constructor(image: Image, color: string) {
+  frameNumber: number;
+  sizeRatio: number;
+  constructor(image: Image, color: string, frameNumber: number, sizeRatio: number) {
     this.color = color;
 
     this.image = image;
+    this.frameNumber = frameNumber;
+    this.sizeRatio = sizeRatio;
+
     this.createCanvas();
   }
   private createCanvas() {
-    const width = this.image?.width;
-    const height = this.image?.height;
+    const width = this.image?.width * this.sizeRatio;
+    const height = this.image?.height * this.sizeRatio;
     this.canvas = createCanvas(width, height);
     this.ctx = this.canvas.getContext("2d");
   }
@@ -58,37 +62,51 @@ export default class Editor {
       return;
     }
 
-  // キャンバスをクリア
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
+    // キャンバスをクリア
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  // スケールを計算（周期的に変化）
-  const scale = 1 + 0.1 * Math.sin(i * Math.PI / this.frameNumber);
+    // スケールを計算（周期的に変化）
+    const scale = 1 + 0.1 * Math.sin(i * Math.PI / this.frameNumber);
 
-  // 画像の中心位置を計算
-  const imageCenterX = canvas.width / 2;
-  const imageCenterY = canvas.height / 2;
+    // 画像の中心位置を計算
+    const imageCenterX = canvas.width / 2;
+    const imageCenterY = canvas.height / 2;
 
-  // 画像の描画開始位置を計算
-  const drawX = imageCenterX - (this.image.width * scale) / 2;
-  const drawY = imageCenterY - (this.image.height * scale) / 2;
+    // 画像の描画開始位置を計算
+    const drawX = imageCenterX - (this.image.width * scale * this.sizeRatio) / 2;
+    const drawY = imageCenterY - (this.image.height * scale * this.sizeRatio) / 2;
 
-  // 画像をスケーリングして描画
-  ctx.drawImage(this.image, drawX, drawY, this.image.width * scale, this.image.height * scale);
+    // 画像をスケーリングして描画
+    ctx.drawImage(this.image, drawX, drawY, this.image.width * scale * this.sizeRatio, this.image.height * scale * this.sizeRatio);
+
+    // フィルター効果を適用する色を計算（ここでは例として赤色を強調）
+    const r = Math.floor(255 * Math.abs(Math.sin(i * 2 * Math.PI / this.frameNumber)));
+    const color = `rgba(${r}, 0, 0, 0.3)`; // 赤色を半透明で重ねる
+
+    // ブレンドモードを設定
+    ctx.globalCompositeOperation = 'source-atop';
+
+    // 色をキャンバス全体に適用
+    ctx.fillStyle = color;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // ブレンドモードをデフォルトに戻す
+    ctx.globalCompositeOperation = 'source-over';
 
     // 集中線の中心点（例として画像の中心を使用）
     const centerX = canvas.width / 2;
     const centerY = canvas.height / 2;
 
     // 集中線の設定
-    const lineCount = 70 + Math.random() * 20; // 三角形の数
+    const lineCount = 140 + Math.random() * 20; // 三角形の数
     const lineColor = this.color; // 線（三角形）の色
     const maxRadius = Math.sqrt(Math.pow(canvas.width, 2) + Math.pow(canvas.height, 2)) / 2;
 
     for (let i = 0; i < lineCount; i++) {
       const angle = 2 * Math.PI * Math.random(); // 三角形ごとの角度
-      const nextAngle = angle + Math.PI * (0.005 + 0.01 * Math.random()); // 次の三角形の角度
+      const nextAngle = angle + Math.PI * (0.005 + 0.001 * Math.random()); // 次の三角形の角度
       const angleAverage = (angle + nextAngle) / 2; // 三角形の中心点の角度
-      const radius = maxRadius * (0.5 + 0.1 * Math.random()); // 三角形の中心点の半径
+      const radius = maxRadius * (0.3 + 0.2 * Math.random()); // 三角形の中心点の半径
       const focusX = centerX + Math.cos(angleAverage) * (maxRadius - radius); // 三角形の中心点のX座標
       const focusY = centerY + Math.sin(angleAverage) * (maxRadius - radius); // 三角形の中心点のY座標
 
