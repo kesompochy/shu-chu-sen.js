@@ -8,13 +8,14 @@ export default class Editor {
   ctx: CanvasRenderingContext2D | undefined;
   frameNumber: number;
   sizeRatio: number;
-  constructor(image: Image, color: string, frameNumber: number, sizeRatio: number) {
+  rotationSpeed: number;
+  constructor(image: Image, color: string, frameNumber: number, sizeRatio: number, rotationSpeed: number) {
     this.color = color;
 
     this.image = image;
     this.frameNumber = frameNumber;
     this.sizeRatio = sizeRatio;
-
+    this.rotationSpeed = rotationSpeed;
     this.createCanvas();
   }
   private createCanvas() {
@@ -72,13 +73,23 @@ export default class Editor {
     const imageCenterX = canvas.width / 2;
     const imageCenterY = canvas.height / 2;
 
-    // 画像の描画開始位置を計算
-    const drawX = imageCenterX - (this.image.width * scale * this.sizeRatio) / 2;
-    const drawY = imageCenterY - (this.image.height * scale * this.sizeRatio) / 2;
+    // 回転角度を計算（2π * rotationSpeed * フレーム番号）
+    const rotation = 2 * Math.PI * this.rotationSpeed * i;
+
+    // 回転の中心を設定
+    ctx.save();
+    ctx.translate(imageCenterX, imageCenterY);
+    ctx.rotate(rotation);
+
+    // 画像の描画開始位置を計算（回転の中心を考慮）
+    const drawX = -(this.image.width * scale * this.sizeRatio) / 2;
+    const drawY = -(this.image.height * scale * this.sizeRatio) / 2;
 
     // 画像をスケーリングして描画
     ctx.drawImage(this.image, drawX, drawY, this.image.width * scale * this.sizeRatio, this.image.height * scale * this.sizeRatio);
 
+    ctx.restore();
+    
     // フィルター効果を適用する色を計算（ここでは例として赤色を強調）
     const r = Math.floor(100 + 155 * Math.abs(Math.sin(i * 0.7 * Math.PI / this.frameNumber)));
     const color = `rgba(${r}, 100, 100, 0.3)`; // 赤色を半透明で重ねる
