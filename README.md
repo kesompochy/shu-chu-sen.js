@@ -7,7 +7,6 @@ This CLI tool generates Speed Lines for overlaying on any image.
 ## Usage
 
 ```sh
-$ pnpm install
-$ pnpm build
-$ node ./dist/index.js /PATH/TO/INPUT/IMAGE/image.ext /PATH/TO/OUTPUT/IMAGE/image.ext color
+$ bun install
+$ bun run ./dist/index.js /PATH/TO/INPUT/IMAGE/image.ext /PATH/TO/OUTPUT/IMAGE/image.ext color
 ```
