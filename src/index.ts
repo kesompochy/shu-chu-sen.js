@@ -12,7 +12,10 @@ command
   .option("-c, --color <color>", "color", "black")
   .option("-f, --frame <number>", "frame number", "12")
   .option("-s, --sizeRatio <number>", "size ratio", "0.25")
-  .option("-r, --rotation", "enable rotation", false);
+  .option("--background-color <color>", "background color")
+  .option("-r, --rotation", "enable rotation", false)
+  .option("-p, --pulse", "enable pulse", false)
+  .option("--color-fade", "enable color fade", false);
 
 interface Options {
   out: string;
@@ -20,14 +23,17 @@ interface Options {
   frame: number;
   sizeRatio: number;
   rotation: boolean;
+  pulse: boolean;
+  colorFade: boolean;
+  backgroundColor?: string;
 }
 
 const main = async (sourceFilePath: string, options: Options) => {
-  const { out, color, frame, sizeRatio, rotation } = options;
+  const { out, color, frame, sizeRatio, rotation, pulse, colorFade, backgroundColor } = options;
   const rotationSpeed = rotation ? 1/frame : 0;
   const image: typeof Image = await loadImage(sourceFilePath);
 
-  const editor = new Editor(image, color!, frame, sizeRatio, rotationSpeed);
+  const editor = new Editor(image, color!, frame, sizeRatio, rotationSpeed, pulse, colorFade, backgroundColor);
   const gif = editor.generateGif();
   if (gif) {
     fs.writeFileSync(out, gif);

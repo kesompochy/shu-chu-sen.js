@@ -9,13 +9,18 @@ export default class Editor {
   frameNumber: number;
   sizeRatio: number;
   rotationSpeed: number;
-  constructor(image: Image, color: string, frameNumber: number, sizeRatio: number, rotationSpeed: number) {
+  pulse: boolean;
+  colorFade: boolean;
+  backgroundColor: string | undefined;
+  constructor(image: Image, color: string, frameNumber: number, sizeRatio: number, rotationSpeed: number, pulse: boolean, colorFade: boolean, backgroundColor?: string) {
     this.color = color;
-
     this.image = image;
     this.frameNumber = frameNumber;
     this.sizeRatio = sizeRatio;
     this.rotationSpeed = rotationSpeed;
+    this.pulse = pulse;
+    this.colorFade = colorFade;
+    this.backgroundColor = backgroundColor;
     this.createCanvas();
   }
   private createCanvas() {
@@ -66,8 +71,14 @@ export default class Editor {
     // キャンバスをクリア
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+    // 背景色を設定
+    if (this.backgroundColor) {
+      ctx.fillStyle = this.backgroundColor;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+    }
+
     // スケールを計算（周期的に変化）
-    const scale = 1 + 0.1 * Math.sin(i * Math.PI / this.frameNumber);
+    const scale = this.pulse ? 1 + 0.1 * Math.sin(i * Math.PI / this.frameNumber) : 1;
 
     // 画像の中心位置を計算
     const imageCenterX = canvas.width / 2;
@@ -89,20 +100,22 @@ export default class Editor {
     ctx.drawImage(this.image, drawX, drawY, this.image.width * scale * this.sizeRatio, this.image.height * scale * this.sizeRatio);
 
     ctx.restore();
-    
-    // フィルター効果を適用する色を計算（ここでは例として赤色を強調）
-    const r = Math.floor(100 + 155 * Math.abs(Math.sin(i * 0.7 * Math.PI / this.frameNumber)));
-    const color = `rgba(${r}, 100, 100, 0.3)`; // 赤色を半透明で重ねる
 
-    // ブレンドモードを設定
-    ctx.globalCompositeOperation = 'source-atop';
+    if (this.colorFade) {
+      // フィルター効果を適用する色を計算
+      const r = Math.floor(100 + 155 * Math.abs(Math.sin(i * 0.7 * Math.PI / this.frameNumber)));
+      const color = `rgba(${r}, 100, 100, 0.3)`; // 赤色を半透明で重ねる
 
-    // 色をキャンバス全体に適用
-    ctx.fillStyle = color;
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+      // ブレンドモードを設定
+      ctx.globalCompositeOperation = 'source-atop';
 
-    // ブレンドモードをデフォルトに戻す
-    ctx.globalCompositeOperation = 'source-over';
+      // 色をキャンバス全体に適用
+      ctx.fillStyle = color;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // ブレンドモードをデフォルトに戻す
+      ctx.globalCompositeOperation = 'source-over';
+    }
 
     // 集中線の中心点（例として画像の中心を使用）
     const centerX = canvas.width / 2;
