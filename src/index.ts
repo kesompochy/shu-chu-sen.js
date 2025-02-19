@@ -12,7 +12,7 @@ command
   .option("-c, --color <color>", "color", "black")
   .option("-f, --frame <number>", "frame number", "12")
   .option("-s, --sizeRatio <number>", "size ratio", "0.25")
-  .option("-r, --rotation", "enable rotation", "false");
+  .option("-r, --rotation", "enable rotation", false);
 
 interface Options {
   out: string;
