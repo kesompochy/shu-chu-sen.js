@@ -1,30 +1,43 @@
 import fs from "fs";
 const { loadImage, Image } = require("canvas");
+import { Command } from "commander";
 import Editor from "./Editor";
 
-const main = async (sourceFilePath: string, outFilePath?: string, color?: string, frameNumber?: number, sizeRatio?: number, rotation: boolean = true) => {
-  color = color || "black";
-  outFilePath = outFilePath || "output.gif";
-  frameNumber = frameNumber || 12;
-  sizeRatio = sizeRatio || 0.25;
-  const rotationSpeed = rotation ? 1/frameNumber : 0;
+const command = new Command();
+
+command
+  .name("shu-chu-sen.js")
+  .argument("<sourceFilePath>", "source file path")
+  .option("-o, --out <path>", "output file path", "output.gif")
+  .option("-c, --color <color>", "color", "black")
+  .option("-f, --frame <number>", "frame number", "12")
+  .option("-s, --sizeRatio <number>", "size ratio", "0.25")
+  .option("-r, --rotation", "enable rotation", "false");
+
+interface Options {
+  out: string;
+  color: string;
+  frame: number;
+  sizeRatio: number;
+  rotation: boolean;
+}
+
+const main = async (sourceFilePath: string, options: Options) => {
+  const { out, color, frame, sizeRatio, rotation } = options;
+  const rotationSpeed = rotation ? 1/frame : 0;
   const image: typeof Image = await loadImage(sourceFilePath);
 
-  const editor = new Editor(image, color!, frameNumber!, sizeRatio, rotationSpeed);
+  const editor = new Editor(image, color!, frame, sizeRatio, rotationSpeed);
   const gif = editor.generateGif();
   if (gif) {
-    fs.writeFileSync(outFilePath!, gif);
-    console.log(`Gif saved to ${outFilePath}!`);
+    fs.writeFileSync(out, gif);
+    console.log(`Gif saved to ${out}!`);
   }
 };
 
-const sourceFilePath = process.argv[2];
-const outFilePath = process.argv[3];
-const color = process.argv[4];
-const frameNumber = process.argv[5] ? parseInt(process.argv[5]) : undefined;
-const sizeRatio = process.argv[6] ? parseFloat(process.argv[6]) : undefined;
-const rotation = process.argv[7] ? process.argv[7] === "true" : true;
+command.parse();
+const options = command.opts() as Options;
 
-main(sourceFilePath, outFilePath, color, frameNumber, sizeRatio, rotation);
+main(command.args[0], options);
 
 export default main;

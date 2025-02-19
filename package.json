@@ -23,6 +23,7 @@
   },
   "dependencies": {
     "canvas": "^3.0.0-rc2",
+    "commander": "^13.1.0",
     "gifencoder": "^2.0.1"
   }
 }
