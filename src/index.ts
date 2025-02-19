@@ -21,7 +21,10 @@ const main = async (sourceFilePath: string, outFilePath?: string, color?: string
 const sourceFilePath = process.argv[2];
 const outFilePath = process.argv[3];
 const color = process.argv[4];
+const frameNumber = process.argv[5] ? parseInt(process.argv[5]) : undefined;
+const sizeRatio = process.argv[6] ? parseFloat(process.argv[6]) : undefined;
+const rotation = process.argv[7] ? process.argv[7] === "true" : true;
 
-main(sourceFilePath, outFilePath, color);
+main(sourceFilePath, outFilePath, color, frameNumber, sizeRatio, rotation);
 
 export default main;
