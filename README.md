@@ -8,5 +8,5 @@ This CLI tool generates Speed Lines for overlaying on any image.
 
 ```sh
 $ bun install
-$ bun run ./dist/index.js /PATH/TO/INPUT/IMAGE/image.ext /PATH/TO/OUTPUT/IMAGE/image.ext color
+$ bun run ./src/index.ts ./path/to/input/image.ext --out output.gif --color yellow --frame 12 --sizeRatio 0.25 --rotation
 ```
